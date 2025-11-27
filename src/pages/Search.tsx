@@ -84,8 +84,13 @@ const Search = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
+      {/* Search Bar Section */}
+      <div className="container mx-auto px-4 pt-8 pb-4">
+        <SearchBar defaultValue={queryParam} variant="compact" />
+      </div>
+
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pb-8">
         <div className="grid lg:grid-cols-[300px_1fr] gap-8">
           {/* Filters Sidebar */}
           <aside className="hidden lg:block">

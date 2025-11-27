@@ -8,7 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Heart, MapPin, Phone, Clock, Star } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, Heart, MapPin, Phone, Clock, Star, Wifi, Zap, Dog, Cat, Trees, MessageSquarePlus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -17,6 +18,10 @@ interface Comment {
   cafeId: number;
   username: string;
   rating: number;
+  drinkRating: number;
+  foodRating: number;
+  serviceRating: number;
+  atmosphereRating: number;
   text: string;
   date: string;
 }
@@ -31,7 +36,15 @@ const CafeDetail = () => {
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [userComments, setUserComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState({ rating: 5, text: "" });
+  const [newComment, setNewComment] = useState({ 
+    rating: 5, 
+    drinkRating: 5, 
+    foodRating: 5, 
+    serviceRating: 5, 
+    atmosphereRating: 5, 
+    text: "" 
+  });
+  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
@@ -80,17 +93,29 @@ const CafeDetail = () => {
       id: Date.now().toString(),
       cafeId: cafe.id,
       username: user!.username,
-      rating: newComment.rating,
+      rating: Math.round((newComment.drinkRating + newComment.foodRating + newComment.serviceRating + newComment.atmosphereRating) / 4),
+      drinkRating: newComment.drinkRating,
+      foodRating: newComment.foodRating,
+      serviceRating: newComment.serviceRating,
+      atmosphereRating: newComment.atmosphereRating,
       text: newComment.text,
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      date: new Date().toLocaleDateString("ja-JP", { month: "short", day: "numeric", year: "numeric" }),
     };
 
     const allComments = JSON.parse(localStorage.getItem("cafe_comments") || "[]");
     const updatedComments = [...allComments, comment];
     localStorage.setItem("cafe_comments", JSON.stringify(updatedComments));
     setUserComments([...userComments, comment]);
-    setNewComment({ rating: 5, text: "" });
-    toast.success("Comment added successfully!");
+    setNewComment({ 
+      rating: 5, 
+      drinkRating: 5, 
+      foodRating: 5, 
+      serviceRating: 5, 
+      atmosphereRating: 5, 
+      text: "" 
+    });
+    setIsCommentDialogOpen(false);
+    toast.success("コメントを投稿しました！");
   };
 
   const ratingDistribution = [78, 32, 10, 2, 1];
@@ -138,9 +163,9 @@ const CafeDetail = () => {
         {/* Photo Tabs */}
         <Tabs defaultValue="interior" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-3 bg-secondary/50">
-            <TabsTrigger value="interior">Interior</TabsTrigger>
-            <TabsTrigger value="menu">Menu</TabsTrigger>
-            <TabsTrigger value="food">Food & Drinks</TabsTrigger>
+            <TabsTrigger value="interior">店内</TabsTrigger>
+            <TabsTrigger value="menu">メニュー</TabsTrigger>
+            <TabsTrigger value="food">料理と飲み物</TabsTrigger>
           </TabsList>
           <TabsContent value="interior" className="mt-4">
             <div className="grid sm:grid-cols-2 gap-4">
@@ -186,154 +211,411 @@ const CafeDetail = () => {
         <div className="grid lg:grid-cols-[1fr_400px] gap-8">
           {/* Main Content */}
           <div className="space-y-8">
-            {/* Info Card */}
-            <Card className="shadow-card border-border/50">
-              <CardContent className="p-6 space-y-4">
-                <h2 className="text-2xl font-semibold text-foreground">About</h2>
-                <p className="text-muted-foreground leading-relaxed">{cafe.description}</p>
-                
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-sm">{cafe.address}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-5 w-5 text-primary shrink-0" />
-                    <span className="text-sm">{cafe.hours}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-primary shrink-0" />
-                    <span className="text-sm">{cafe.phone}</span>
-                  </div>
-                </div>
+            {/* Info Tabs */}
+            <Tabs defaultValue="about" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-secondary/50">
+                <TabsTrigger value="about">基本情報</TabsTrigger>
+                <TabsTrigger value="amenities">設備</TabsTrigger>
+                <TabsTrigger value="details">詳細</TabsTrigger>
+              </TabsList>
 
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {cafe.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="px-3 py-1">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+              <TabsContent value="about" className="mt-4">
+                <Card className="shadow-card border-border/50">
+                  <CardContent className="p-6 space-y-4">
+                    <h2 className="text-2xl font-semibold text-foreground">このカフェについて</h2>
+                    <p className="text-muted-foreground leading-relaxed">{cafe.description}</p>
+                    
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">住所</p>
+                          <span className="text-sm">{cafe.address}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">営業時間</p>
+                          <span className="text-sm">{cafe.hours}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">電話番号</p>
+                          <span className="text-sm">{cafe.phone}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="amenities" className="mt-4">
+                <Card className="shadow-card border-border/50">
+                  <CardContent className="p-6 space-y-4">
+                    <h2 className="text-2xl font-semibold text-foreground">設備とサービス</h2>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {cafe.tags.includes("Wi-Fi") && (
+                        <div className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg">
+                          <Wifi className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">無料Wi-Fi</p>
+                            <p className="text-xs text-muted-foreground">高速インターネット接続</p>
+                          </div>
+                        </div>
+                      )}
+                      {cafe.tags.includes("Power Outlets") && (
+                        <div className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg">
+                          <Zap className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">電源コンセント</p>
+                            <p className="text-xs text-muted-foreground">全席利用可能</p>
+                          </div>
+                        </div>
+                      )}
+                      {cafe.tags.some(t => t.toLowerCase().includes("dog")) && (
+                        <div className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg">
+                          <Dog className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">ペット同伴可</p>
+                            <p className="text-xs text-muted-foreground">犬と一緒に楽しめます</p>
+                          </div>
+                        </div>
+                      )}
+                      {cafe.tags.some(t => t.toLowerCase().includes("cat")) && (
+                        <div className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg">
+                          <Cat className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">猫カフェ</p>
+                            <p className="text-xs text-muted-foreground">かわいい猫たちと触れ合えます</p>
+                          </div>
+                        </div>
+                      )}
+                      {cafe.tags.includes("Outdoor") && (
+                        <div className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg">
+                          <Trees className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">屋外席</p>
+                            <p className="text-xs text-muted-foreground">テラス席あり</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-4">
+                      {cafe.tags.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="px-3 py-1">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="details" className="mt-4">
+                <Card className="shadow-card border-border/50">
+                  <CardContent className="p-6 space-y-4">
+                    <h2 className="text-2xl font-semibold text-foreground">詳細情報</h2>
+                    <div className="space-y-4">
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-muted-foreground">価格帯</p>
+                          <p className="text-lg font-semibold capitalize">
+                            {cafe.price_range === "cheap" && "お手頃 (¥)"}
+                            {cafe.price_range === "moderate" && "標準 (¥¥)"}
+                            {cafe.price_range === "expensive" && "高級 (¥¥¥)"}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-muted-foreground">距離</p>
+                          <p className="text-lg font-semibold">{cafe.distance} km</p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-muted-foreground">総レビュー数</p>
+                          <p className="text-lg font-semibold">{cafe.reviews} 件</p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-muted-foreground">平均評価</p>
+                          <p className="text-lg font-semibold flex items-center gap-1">
+                            <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+                            {cafe.rating}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="pt-4 border-t border-border">
+                        <p className="text-sm font-medium text-muted-foreground mb-2">支払い方法</p>
+                        <p className="text-sm">現金、クレジットカード、電子マネー対応</p>
+                      </div>
+                      <div className="pt-2">
+                        <p className="text-sm font-medium text-muted-foreground mb-2">駐車場</p>
+                        <p className="text-sm">近隣にコインパーキングあり</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
 
             {/* Reviews Section */}
             <Card className="shadow-card border-border/50">
               <CardContent className="p-6 space-y-6">
-                <div>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6">Reviews & Comments</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-semibold text-foreground">レビュー・コメント</h2>
                   
-                  {/* Add Comment Form */}
+                  {/* Add Comment Button */}
                   {isAuthenticated ? (
-                    <form onSubmit={handleSubmitComment} className="space-y-4 p-4 bg-secondary/20 rounded-xl mb-6">
-                      <div className="space-y-2">
-                        <Label>Your Rating</Label>
-                        <div className="flex gap-2">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              type="button"
-                              onClick={() => setNewComment({ ...newComment, rating: star })}
-                              className="transition-transform hover:scale-110"
-                            >
-                              <Star
-                                className={`h-6 w-6 ${
-                                  star <= newComment.rating
-                                    ? "fill-yellow-500 text-yellow-500"
-                                    : "text-muted-foreground"
-                                }`}
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="comment-text">Your Comment</Label>
-                        <Textarea
-                          id="comment-text"
-                          placeholder="Share your experience at this café..."
-                          value={newComment.text}
-                          onChange={(e) => setNewComment({ ...newComment, text: e.target.value })}
-                          rows={3}
-                        />
-                      </div>
-                      <Button type="submit" className="w-full">Post Comment</Button>
-                    </form>
+                    <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" className="gap-2">
+                          <MessageSquarePlus className="h-4 w-4" />
+                          コメントを追加
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                          <DialogTitle>コメントを投稿</DialogTitle>
+                          <DialogDescription>
+                            このカフェでの体験を評価してシェアしてください
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmitComment} className="space-y-6 pt-4">
+                          {/* Individual Category Ratings */}
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label className="text-base">飲み物の評価</Label>
+                              <div className="flex gap-2">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                                  <button
+                                    key={rating}
+                                    type="button"
+                                    onClick={() => setNewComment({ ...newComment, drinkRating: rating })}
+                                    className={`h-8 w-8 rounded-full text-sm font-medium transition-all ${
+                                      rating <= newComment.drinkRating
+                                        ? "bg-primary text-primary-foreground scale-110"
+                                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                                    }`}
+                                  >
+                                    {rating}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-base">料理の評価</Label>
+                              <div className="flex gap-2">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                                  <button
+                                    key={rating}
+                                    type="button"
+                                    onClick={() => setNewComment({ ...newComment, foodRating: rating })}
+                                    className={`h-8 w-8 rounded-full text-sm font-medium transition-all ${
+                                      rating <= newComment.foodRating
+                                        ? "bg-primary text-primary-foreground scale-110"
+                                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                                    }`}
+                                  >
+                                    {rating}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-base">サービスの評価</Label>
+                              <div className="flex gap-2">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                                  <button
+                                    key={rating}
+                                    type="button"
+                                    onClick={() => setNewComment({ ...newComment, serviceRating: rating })}
+                                    className={`h-8 w-8 rounded-full text-sm font-medium transition-all ${
+                                      rating <= newComment.serviceRating
+                                        ? "bg-primary text-primary-foreground scale-110"
+                                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                                    }`}
+                                  >
+                                    {rating}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-base">雰囲気の評価</Label>
+                              <div className="flex gap-2">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                                  <button
+                                    key={rating}
+                                    type="button"
+                                    onClick={() => setNewComment({ ...newComment, atmosphereRating: rating })}
+                                    className={`h-8 w-8 rounded-full text-sm font-medium transition-all ${
+                                      rating <= newComment.atmosphereRating
+                                        ? "bg-primary text-primary-foreground scale-110"
+                                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                                    }`}
+                                  >
+                                    {rating}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="comment-text">コメント</Label>
+                            <Textarea
+                              id="comment-text"
+                              placeholder="このカフェでの体験を共有してください..."
+                              value={newComment.text}
+                              onChange={(e) => setNewComment({ ...newComment, text: e.target.value })}
+                              rows={4}
+                            />
+                          </div>
+                          <div className="flex gap-3">
+                            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCommentDialogOpen(false)}>
+                              キャンセル
+                            </Button>
+                            <Button type="submit" className="flex-1">投稿する</Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
                   ) : (
-                    <div className="p-4 bg-secondary/20 rounded-xl mb-6 text-center">
-                      <p className="text-muted-foreground mb-3">Login to share your experience</p>
-                      <Button onClick={() => navigate("/auth")} variant="outline">Login</Button>
-                    </div>
+                    <Button onClick={() => navigate("/auth")} variant="outline" size="sm">
+                      ログインして投稿
+                    </Button>
                   )}
                 </div>
 
                 {/* Rating Distribution */}
-                <div className="space-y-2">
+                <div className="space-y-2 pt-4">
                   {[5, 4, 3, 2, 1].map((stars, idx) => (
                     <div key={stars} className="flex items-center gap-3">
-                      <span className="text-sm w-12">{stars} stars</span>
-                      <div className="flex-1 bg-secondary rounded-full h-2 overflow-hidden">
+                      <span className="text-sm w-16">★ {stars}</span>
+                      <div className="flex-1 bg-secondary rounded-full h-3 overflow-hidden">
                         <div
-                          className="bg-primary h-full"
+                          className="bg-primary h-full transition-all"
                           style={{ width: `${(ratingDistribution[idx] / 123) * 100}%` }}
                         />
                       </div>
-                      <span className="text-sm text-muted-foreground w-8">
+                      <span className="text-sm text-muted-foreground w-10 text-right">
                         {ratingDistribution[idx]}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                {/* Category Ratings */}
-                <div className="grid sm:grid-cols-2 gap-4 pt-4">
-                  {Object.entries(avgCategories).map(([key, value]) => (
-                    <div key={key} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="capitalize text-muted-foreground">{key}</span>
-                        <span className="font-semibold">{value.toFixed(1)}</span>
-                      </div>
-                      <div className="bg-secondary rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-primary h-full"
-                          style={{ width: `${(value / 5) * 100}%` }}
-                        />
-                      </div>
+                {/* Category Ratings with 1-10 scale */}
+                <div className="grid sm:grid-cols-2 gap-4 pt-6 border-t border-border">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">飲み物</span>
+                      <span className="text-2xl font-bold text-primary">{avgCategories.drinks.toFixed(1)}</span>
                     </div>
-                  ))}
+                    <div className="bg-secondary rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-primary/80 to-primary h-full transition-all"
+                        style={{ width: `${(avgCategories.drinks / 5) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">料理</span>
+                      <span className="text-2xl font-bold text-primary">{avgCategories.food.toFixed(1)}</span>
+                    </div>
+                    <div className="bg-secondary rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-primary/80 to-primary h-full transition-all"
+                        style={{ width: `${(avgCategories.food / 5) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">サービス</span>
+                      <span className="text-2xl font-bold text-primary">{avgCategories.service.toFixed(1)}</span>
+                    </div>
+                    <div className="bg-secondary rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-primary/80 to-primary h-full transition-all"
+                        style={{ width: `${(avgCategories.service / 5) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">雰囲気</span>
+                      <span className="text-2xl font-bold text-primary">{avgCategories.atmosphere.toFixed(1)}</span>
+                    </div>
+                    <div className="bg-secondary rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-primary/80 to-primary h-full transition-all"
+                        style={{ width: `${(avgCategories.atmosphere / 5) * 100}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Individual Reviews & Comments */}
-                <div className="space-y-4 pt-4 border-t border-border">
+                <div className="space-y-6 pt-6 border-t border-border">
                   {allReviews.map((review) => (
-                    <div key={review.id} className="space-y-2">
+                    <div key={review.id} className="space-y-3 p-4 bg-secondary/10 rounded-xl">
                       <div className="flex items-start gap-3">
                         {"userAvatar" in review ? (
                           <img
                             src={review.userAvatar}
                             alt={review.userName}
-                            className="h-10 w-10 rounded-full"
+                            className="h-12 w-12 rounded-full"
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="text-sm font-semibold text-primary">
+                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <span className="text-lg font-semibold text-primary">
                               {review.username.charAt(0).toUpperCase()}
                             </span>
                           </div>
                         )}
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="font-semibold text-base">
                               {"userName" in review ? review.userName : review.username}
                             </span>
-                            <span className="text-xs text-muted-foreground">{review.date}</span>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">{review.date}</span>
                           </div>
-                          <div className="flex items-center gap-1 mt-1">
+                          <div className="flex items-center gap-2 mt-1">
                             {Array.from({ length: review.rating }).map((_, i) => (
-                              <Star key={i} className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                              <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                             ))}
+                            <span className="text-sm font-semibold text-muted-foreground ml-1">
+                              {review.rating}.0
+                            </span>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-2">{review.text}</p>
+                          
+                          {"drinkRating" in review && (
+                            <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                              <div className="flex items-center justify-between px-2 py-1 bg-background/50 rounded">
+                                <span className="text-muted-foreground">飲み物</span>
+                                <span className="font-bold text-primary">{review.drinkRating}</span>
+                              </div>
+                              <div className="flex items-center justify-between px-2 py-1 bg-background/50 rounded">
+                                <span className="text-muted-foreground">料理</span>
+                                <span className="font-bold text-primary">{review.foodRating}</span>
+                              </div>
+                              <div className="flex items-center justify-between px-2 py-1 bg-background/50 rounded">
+                                <span className="text-muted-foreground">サービス</span>
+                                <span className="font-bold text-primary">{review.serviceRating}</span>
+                              </div>
+                              <div className="flex items-center justify-between px-2 py-1 bg-background/50 rounded">
+                                <span className="text-muted-foreground">雰囲気</span>
+                                <span className="font-bold text-primary">{review.atmosphereRating}</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <p className="text-sm text-foreground mt-3 leading-relaxed">{review.text}</p>
                         </div>
                       </div>
                     </div>
@@ -347,25 +629,29 @@ const CafeDetail = () => {
           <aside className="space-y-4">
             <Card className="shadow-card border-border/50 sticky top-24">
               <CardContent className="p-6 space-y-4">
-                <h3 className="font-semibold text-lg">Quick Info</h3>
+                <h3 className="font-semibold text-lg">クイック情報</h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Price Range</span>
-                    <span className="font-medium capitalize">{cafe.price_range}</span>
+                    <span className="text-muted-foreground">価格帯</span>
+                    <span className="font-medium capitalize">
+                      {cafe.price_range === "cheap" && "¥"}
+                      {cafe.price_range === "moderate" && "¥¥"}
+                      {cafe.price_range === "expensive" && "¥¥¥"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Rating</span>
+                    <span className="text-muted-foreground">評価</span>
                     <span className="font-medium">⭐ {cafe.rating}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Distance</span>
+                    <span className="text-muted-foreground">距離</span>
                     <span className="font-medium">{cafe.distance} km</span>
                   </div>
                 </div>
                 <Button className="w-full" variant="outline">
-                  Get Directions
+                  道順を取得
                 </Button>
-                <Button className="w-full">Call Now</Button>
+                <Button className="w-full">電話する</Button>
               </CardContent>
             </Card>
           </aside>
