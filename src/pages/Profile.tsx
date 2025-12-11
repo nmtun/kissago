@@ -119,8 +119,8 @@ const Profile = () => {
 
       {/* Profile Content */}
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4 bg-secondary/50">
+        <Tabs defaultValue="profile" className="w-full max-w-3xl">
+          <TabsList className="grid w-full grid-cols-4 bg-secondary/50">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">プロフィール</span>
@@ -141,7 +141,7 @@ const Profile = () => {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="mt-8">
-            <Card className="max-w-xl shadow-card border-border/50">
+            <Card className="shadow-card border-border/50">
               <CardHeader>
                 <CardTitle>プロフィール編集</CardTitle>
                 <CardDescription>あなたの情報を更新してください</CardDescription>
@@ -184,7 +184,7 @@ const Profile = () => {
 
           {/* Preferences Tab */}
           <TabsContent value="preferences" className="mt-8">
-            <Card className="max-w-2xl shadow-card border-border/50">
+            <Card className="shadow-card border-border/50">
               <CardHeader>
                 <CardTitle>好みの設定</CardTitle>
                 <CardDescription>カフェ検索をカスタマイズしましょう</CardDescription>
@@ -337,7 +337,7 @@ const Profile = () => {
                     あなたのカフェ体験をシェア
                   </p>
                 </div>
-                <div className="space-y-4 max-w-3xl">
+                <div className="space-y-4">
                   {myReviews.map((review, idx) => (
                     <Card key={idx} className="shadow-card border-border/50">
                       <CardContent className="p-6">
