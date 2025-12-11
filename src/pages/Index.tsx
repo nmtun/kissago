@@ -1,9 +1,69 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { Navigation } from "@/components/Navigation";
-import { MapPin, Coffee, Heart } from "lucide-react";
+import { CafeCard } from "@/components/CafeCard";
+import { getAllCafes, Cafe } from "@/lib/mock-data";
+import { MapPin, Coffee, Heart, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-cafe.jpg";
 
+interface UserPreferences {
+  cafeTypes: string[];
+  priceRange: string[];
+  maxDistance: string;
+  amenities: string[];
+}
+
+const getRecommendedCafes = (preferences: UserPreferences | null, allCafes: Cafe[]): Cafe[] => {
+  if (!preferences || (preferences.cafeTypes.length === 0 && preferences.priceRange.length === 0 && preferences.amenities.length === 0)) {
+    // No preferences, return top rated cafes
+    return [...allCafes].sort((a, b) => b.rating - a.rating).slice(0, 5);
+  }
+
+  // Score each cafe based on preferences match
+  const scoredCafes = allCafes.map(cafe => {
+    let score = 0;
+    
+    // Price range match
+    if (preferences.priceRange.includes(cafe.price_range)) {
+      score += 3;
+    }
+    
+    // Cafe type match
+    if (preferences.cafeTypes.includes("dog") && cafe.tags.some(t => t.toLowerCase().includes("dog"))) score += 2;
+    if (preferences.cafeTypes.includes("cat") && cafe.tags.some(t => t.toLowerCase().includes("cat"))) score += 2;
+    if (preferences.cafeTypes.includes("work") && cafe.tags.some(t => t.toLowerCase().includes("work") || t.toLowerCase().includes("wi-fi"))) score += 2;
+    if (preferences.cafeTypes.includes("quiet") && cafe.tags.some(t => t.toLowerCase().includes("quiet") || t.toLowerCase().includes("book"))) score += 2;
+    
+    // Amenities match
+    if (preferences.amenities.includes("wifi") && cafe.tags.some(t => t.toLowerCase().includes("wi-fi"))) score += 1;
+    if (preferences.amenities.includes("outlets") && cafe.tags.some(t => t.toLowerCase().includes("outlet") || t.toLowerCase().includes("power"))) score += 1;
+    if (preferences.amenities.includes("outdoor") && cafe.tags.some(t => t.toLowerCase().includes("outdoor") || t.toLowerCase().includes("garden"))) score += 1;
+    
+    // Distance preference
+    const maxDist = preferences.maxDistance === "any" ? 100 : parseFloat(preferences.maxDistance);
+    if (cafe.distance && cafe.distance <= maxDist) score += 1;
+    
+    // Add rating as tie-breaker
+    score += cafe.rating / 10;
+    
+    return { cafe, score };
+  });
+
+  return scoredCafes
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(item => item.cafe);
+};
+
 const Index = () => {
+  const [recommendedCafes, setRecommendedCafes] = useState<Cafe[]>([]);
+
+  useEffect(() => {
+    const savedPreferences = JSON.parse(localStorage.getItem("user_preferences") || "null");
+    const allCafes = getAllCafes();
+    setRecommendedCafes(getRecommendedCafes(savedPreferences, allCafes));
+  }, []);
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -53,40 +113,68 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Quick Features */}
+      {/* Recommended Cafes Section */}
       <section className="py-16 bg-secondary/30">
         <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <Sparkles className="h-6 w-6 text-primary" />
+            <h2 className="text-3xl font-bold text-center text-foreground">
+              あなたにおすすめ
+            </h2>
+          </div>
+          <p className="text-center text-muted-foreground mb-10">
+            あなたの好みに基づいたカフェをご紹介
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
+            {recommendedCafes.map((cafe) => (
+              <CafeCard key={cafe.id} cafe={cafe} />
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link 
+              to="/search" 
+              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+            >
+              もっと見る →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Features */}
+      <section className="py-16 bg-card">
+        <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
-            What Makes Us Special
+            私たちの特徴
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center space-y-3 p-6 rounded-xl bg-card shadow-card hover:shadow-hover transition-shadow">
+            <div className="text-center space-y-3 p-6 rounded-xl bg-secondary/50 shadow-card hover:shadow-hover transition-shadow">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-primary mb-2">
                 <Coffee className="h-7 w-7" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Curated Selection</h3>
+              <h3 className="text-xl font-semibold text-foreground">厳選されたセレクション</h3>
               <p className="text-muted-foreground">
-                Handpicked cafés with authentic reviews and detailed information
+                本物のレビューと詳細情報を持つ厳選されたカフェ
               </p>
             </div>
             
-            <div className="text-center space-y-3 p-6 rounded-xl bg-card shadow-card hover:shadow-hover transition-shadow">
+            <div className="text-center space-y-3 p-6 rounded-xl bg-secondary/50 shadow-card hover:shadow-hover transition-shadow">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-primary mb-2">
                 <MapPin className="h-7 w-7" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Smart Filters</h3>
+              <h3 className="text-xl font-semibold text-foreground">スマートフィルター</h3>
               <p className="text-muted-foreground">
-                Find exactly what you need: wifi, pet-friendly, quiet, or lively
+                Wi-Fi、ペット可、静か、賑やかなど、必要なものを見つけよう
               </p>
             </div>
             
-            <div className="text-center space-y-3 p-6 rounded-xl bg-card shadow-card hover:shadow-hover transition-shadow">
+            <div className="text-center space-y-3 p-6 rounded-xl bg-secondary/50 shadow-card hover:shadow-hover transition-shadow">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-primary mb-2">
                 <Heart className="h-7 w-7" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Save Favorites</h3>
+              <h3 className="text-xl font-semibold text-foreground">お気に入りを保存</h3>
               <p className="text-muted-foreground">
-                Build your personal collection of go-to cafés
+                お気に入りのカフェコレクションを作ろう
               </p>
             </div>
           </div>
