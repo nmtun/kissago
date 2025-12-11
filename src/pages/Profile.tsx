@@ -119,7 +119,7 @@ const Profile = () => {
 
       {/* Profile Content */}
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="profile" className="w-full max-w-3xl">
+        <Tabs defaultValue="profile" className="w-full max-w-3xl mx-auto">
           <TabsList className="grid w-full grid-cols-4 bg-secondary/50">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" />
