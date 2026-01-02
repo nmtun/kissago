@@ -24,7 +24,7 @@ export const Navigation = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <Coffee className="h-7 w-7 text-primary" />
-          <span className="text-2xl font-bold text-foreground">Café Haven</span>
+          <span className="text-2xl font-bold text-foreground">KissaGo</span>
         </Link>
         <nav className="flex items-center gap-4">
           <Link to="/search">
@@ -38,7 +38,7 @@ export const Navigation = () => {
               お気に入り
             </Button>
           </Link>
-          
+
           {isAuthenticated ? (
             <>
               <Link to="/add-cafe">

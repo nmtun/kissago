@@ -23,30 +23,30 @@ const getRecommendedCafes = (preferences: UserPreferences | null, allCafes: Cafe
   // Score each cafe based on preferences match
   const scoredCafes = allCafes.map(cafe => {
     let score = 0;
-    
+
     // Price range match
     if (preferences.priceRange.includes(cafe.price_range)) {
       score += 3;
     }
-    
+
     // Cafe type match
     if (preferences.cafeTypes.includes("dog") && cafe.tags.some(t => t.toLowerCase().includes("dog"))) score += 2;
     if (preferences.cafeTypes.includes("cat") && cafe.tags.some(t => t.toLowerCase().includes("cat"))) score += 2;
     if (preferences.cafeTypes.includes("work") && cafe.tags.some(t => t.toLowerCase().includes("work") || t.toLowerCase().includes("wi-fi"))) score += 2;
     if (preferences.cafeTypes.includes("quiet") && cafe.tags.some(t => t.toLowerCase().includes("quiet") || t.toLowerCase().includes("book"))) score += 2;
-    
+
     // Amenities match
     if (preferences.amenities.includes("wifi") && cafe.tags.some(t => t.toLowerCase().includes("wi-fi"))) score += 1;
     if (preferences.amenities.includes("outlets") && cafe.tags.some(t => t.toLowerCase().includes("outlet") || t.toLowerCase().includes("power"))) score += 1;
     if (preferences.amenities.includes("outdoor") && cafe.tags.some(t => t.toLowerCase().includes("outdoor") || t.toLowerCase().includes("garden"))) score += 1;
-    
+
     // Distance preference
     const maxDist = preferences.maxDistance === "any" ? 100 : parseFloat(preferences.maxDistance);
     if (cafe.distance && cafe.distance <= maxDist) score += 1;
-    
+
     // Add rating as tie-breaker
     score += cafe.rating / 10;
-    
+
     return { cafe, score };
   });
 
@@ -131,8 +131,8 @@ const Index = () => {
             ))}
           </div>
           <div className="text-center mt-8">
-            <Link 
-              to="/search" 
+            <Link
+              to="/search"
               className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
             >
               もっと見る →
@@ -157,7 +157,7 @@ const Index = () => {
                 本物のレビューと詳細情報を持つ厳選されたカフェ
               </p>
             </div>
-            
+
             <div className="text-center space-y-3 p-6 rounded-xl bg-secondary/50 shadow-card hover:shadow-hover transition-shadow">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-primary mb-2">
                 <MapPin className="h-7 w-7" />
@@ -167,7 +167,7 @@ const Index = () => {
                 Wi-Fi、ペット可、静か、賑やかなど、必要なものを見つけよう
               </p>
             </div>
-            
+
             <div className="text-center space-y-3 p-6 rounded-xl bg-secondary/50 shadow-card hover:shadow-hover transition-shadow">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-primary mb-2">
                 <Heart className="h-7 w-7" />
@@ -184,7 +184,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 Café Haven. Made with ☕ for café lovers in Hanoi.</p>
+          <p>© ２０２４ KissaGo. ハノイのカフェ好きのために、愛を込めて制作されました。</p>
         </div>
       </footer>
     </div>

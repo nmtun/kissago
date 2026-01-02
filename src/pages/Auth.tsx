@@ -12,7 +12,7 @@ import { toast } from "sonner";
 const Auth = () => {
   const navigate = useNavigate();
   const { login, signup } = useAuth();
-  
+
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [signupForm, setSignupForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -26,7 +26,7 @@ const Auth = () => {
       return;
     }
     login(loginForm.username, loginForm.password);
-    
+
     // Check if this is a new user's first login
     const isNewUser = localStorage.getItem("cafe_haven_is_new_user");
     if (isNewUser) {
@@ -66,7 +66,7 @@ const Auth = () => {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
             <Coffee className="h-8 w-8 text-primary" />
-            <span className="text-3xl font-bold text-foreground">Café Haven</span>
+            <span className="text-3xl font-bold text-foreground">KissaGo</span>
           </Link>
           <p className="text-muted-foreground">カフェ愛好家のコミュニティに参加しよう</p>
         </div>
@@ -82,7 +82,7 @@ const Auth = () => {
                 <TabsTrigger value="login">ログイン</TabsTrigger>
                 <TabsTrigger value="signup">新規登録</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="login" className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
