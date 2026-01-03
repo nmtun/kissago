@@ -1,19 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { getAllCafes } from "@/lib/mock-data";
+import { getAllCafes, Cafe } from "@/lib/mock-data";
 import { CafeCard } from "@/components/CafeCard";
 import { FilterPanel } from "@/components/FilterPanel";
 import { SearchBar } from "@/components/SearchBar";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Coffee } from "lucide-react";
+import { Coffee, MapPin } from "lucide-react";
 import { flexibleMatch } from "@/lib/normalize-text";
+import { calculateDistance } from "@/lib/distance";
+import { useLocation } from "@/contexts/LocationContext";
 
 const Search = () => {
   const [searchParams] = useSearchParams();
   const queryParam = searchParams.get("q") || "";
   
-  const [sortBy, setSortBy] = useState("rating");
+  const [sortBy, setSortBy] = useState("distance");
+  const { userLocation, locationError } = useLocation();
+  const [cafesWithDistance, setCafesWithDistance] = useState<Cafe[]>([]);
   const [filters, setFilters] = useState({
     dogFriendly: false,
     catFriendly: false,
@@ -25,12 +29,29 @@ const Search = () => {
     expensive: false,
   });
 
+  // Calculate distances when user location is available
+  useEffect(() => {
+    if (userLocation) {
+      const allCafes = getAllCafes();
+      const cafesWithDist = allCafes.map((cafe) => ({
+        ...cafe,
+        distance: calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          cafe.lat,
+          cafe.lng
+        ),
+      }));
+      setCafesWithDistance(cafesWithDist);
+    }
+  }, [userLocation]);
+
   const handleFilterChange = (key: string, value: boolean) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const filteredAndSortedCafes = () => {
-    const allCafes = getAllCafes();
+    const allCafes = cafesWithDistance.length > 0 ? cafesWithDistance : getAllCafes();
     let results = allCafes.filter((cafe) => {
       // Text search with Vietnamese diacritic support
       if (queryParam) {
@@ -64,13 +85,32 @@ const Search = () => {
       return true;
     });
 
-    // Sorting
+    // Sorting - Primary by distance, secondary by rating
     results.sort((a, b) => {
-      if (sortBy === "rating") return b.rating - a.rating;
-      if (sortBy === "distance") return (a.distance || 0) - (b.distance || 0);
+      if (sortBy === "distance") {
+        const distDiff = (a.distance || 0) - (b.distance || 0);
+        // If distances are very close (within 0.1km), sort by rating
+        if (Math.abs(distDiff) < 0.1) {
+          return b.rating - a.rating;
+        }
+        return distDiff;
+      }
+      if (sortBy === "rating") {
+        const ratingDiff = b.rating - a.rating;
+        // If ratings are equal, sort by distance
+        if (ratingDiff === 0) {
+          return (a.distance || 0) - (b.distance || 0);
+        }
+        return ratingDiff;
+      }
       if (sortBy === "price-low") {
         const priceOrder = { cheap: 1, moderate: 2, expensive: 3 };
-        return priceOrder[a.price_range] - priceOrder[b.price_range];
+        const priceDiff = priceOrder[a.price_range] - priceOrder[b.price_range];
+        // If prices are equal, sort by rating (high to low)
+        if (priceDiff === 0) {
+          return b.rating - a.rating;
+        }
+        return priceDiff;
       }
       return 0;
     });
@@ -87,6 +127,12 @@ const Search = () => {
       {/* Search Bar Section */}
       <div className="container mx-auto px-4 pt-8 pb-4">
         <SearchBar defaultValue={queryParam} variant="compact" />
+        {locationError && (
+          <div className="mt-2 text-sm text-amber-600 dark:text-amber-500 flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            <span>{locationError} - デフォルトの位置を使用しています</span>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}

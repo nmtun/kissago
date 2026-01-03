@@ -182,7 +182,7 @@ const AddCafe = () => {
                 <Label htmlFor="address">住所 *</Label>
                 <Input
                   id="address"
-                  placeholder="例：123 Hai Bà Trưng, Hoàn Kiếm, Hanoi"
+                  placeholder="例：123 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   required

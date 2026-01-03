@@ -5,6 +5,8 @@ import { Navigation } from "@/components/Navigation";
 import { CafeCard } from "@/components/CafeCard";
 import { getAllCafes, Cafe } from "@/lib/mock-data";
 import { MapPin, Coffee, Heart, Sparkles } from "lucide-react";
+import { calculateDistance } from "@/lib/distance";
+import { useLocation } from "@/contexts/LocationContext";
 import heroImage from "@/assets/hero-cafe.jpg";
 
 interface UserPreferences {
@@ -58,12 +60,27 @@ const getRecommendedCafes = (preferences: UserPreferences | null, allCafes: Cafe
 
 const Index = () => {
   const [recommendedCafes, setRecommendedCafes] = useState<Cafe[]>([]);
+  const { userLocation } = useLocation();
 
   useEffect(() => {
-    const savedPreferences = JSON.parse(localStorage.getItem("user_preferences") || "null");
-    const allCafes = getAllCafes();
-    setRecommendedCafes(getRecommendedCafes(savedPreferences, allCafes));
-  }, []);
+    if (userLocation) {
+      const savedPreferences = JSON.parse(localStorage.getItem("user_preferences") || "null");
+      const allCafes = getAllCafes();
+      
+      // Calculate distances for all cafes
+      const cafesWithDistance = allCafes.map((cafe) => ({
+        ...cafe,
+        distance: calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          cafe.lat,
+          cafe.lng
+        ),
+      }));
+      
+      setRecommendedCafes(getRecommendedCafes(savedPreferences, cafesWithDistance));
+    }
+  }, [userLocation]);
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -88,7 +105,7 @@ const Index = () => {
               <span className="block text-primary">カフェを発見</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              ハノイで素敵なコーヒー、Wi-Fi、雰囲気のあるカフェを見つけよう
+              ベトナムで素敵なコーヒー、Wi-Fi、雰囲気のあるカフェを見つけよう
             </p>
           </div>
 
@@ -99,7 +116,7 @@ const Index = () => {
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-primary" />
-              <span>ハノイに15以上のカフェ</span>
+              <span>ベトナムに15以上のカフェ</span>
             </div>
             <div className="flex items-center gap-2">
               <Coffee className="h-4 w-4 text-primary" />
@@ -184,7 +201,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 KissaGo. ハノイのカフェ好きのために、愛を込めて制作されました。</p>
+          <p>© 2025 KissaGo. ベトナムのカフェ好きのために、愛を込めて制作されました。</p>
         </div>
       </footer>
     </div>
