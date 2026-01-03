@@ -40,13 +40,13 @@ export const CafeCard = ({ cafe }: CafeCardProps) => {
 
   const getPriceDisplay = (priceRange: string) => {
     if (currency === "VND") {
-      if (priceRange === "cheap") return "< 100.000 VND";
-      if (priceRange === "moderate") return "100.000 - 200.000 VND";
-      if (priceRange === "expensive") return "> 200.000 VND";
+      if (priceRange === "cheap") return "100,000 VND以下";
+      if (priceRange === "moderate") return "100,000 - 200,000 VND";
+      if (priceRange === "expensive") return "200,000 VND以上";
     } else {
-      if (priceRange === "cheap") return "< 600 JPY";
-      if (priceRange === "moderate") return "600 - 1200 JPY";
-      if (priceRange === "expensive") return "> 1200 JPY";
+      if (priceRange === "cheap") return "600円以下";
+      if (priceRange === "moderate") return "600 - 1,200円";
+      if (priceRange === "expensive") return "1,200円以上";
     }
     return "";
   };

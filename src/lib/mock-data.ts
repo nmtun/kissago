@@ -53,7 +53,7 @@ const mockCafes: Cafe[] = [
     rating: 4.3,
     reviews: 2,
     price_range: "moderate",
-    tags: ["Wi-Fi", "屋外席", "仕事向き"],
+    tags: ["Wi-Fi", "屋外席", "作業向き", "コンセント", "Wi-Fi安定", "長時間OK", "禁煙"],
     photos: {
       menu: [
         "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=400&fit=crop",
@@ -82,7 +82,7 @@ const mockCafes: Cafe[] = [
     rating: 4.5,
     reviews: 10,
     price_range: "moderate",
-    tags: ["猫カフェ", "Wi-Fi", "落ち着いた"],
+    tags: ["猫カフェ", "Wi-Fi", "静か", "一人でも入りやすい", "猫がいる", "禁煙", "長時間OK"],
     photos: {
       menu: [
         "https://images.unsplash.com/photo-1559305616-3b04f6c7c9ae?w=600&h=400&fit=crop",
@@ -109,7 +109,7 @@ const mockCafes: Cafe[] = [
     rating: 4.3,
     reviews: 3,
     price_range: "cheap",
-    tags: ["ヴィンテージ", "ローカル", "ココナッツコーヒー"],
+    tags: ["ヴィンテージ", "ローカル", "ココナッツコーヒー", "観光向け", "会話向き", "日本人が多い"],
     photos: {
       menu: [
         "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=600&h=400&fit=crop",
@@ -135,7 +135,7 @@ const mockCafes: Cafe[] = [
     rating: 4.6,
     reviews: 3,
     price_range: "expensive",
-    tags: ["プレミアム", "Wi-Fi", "電源", "仕事向き"],
+    tags: ["プレミアム", "Wi-Fi", "コンセント", "作業向き", "Wi-Fi安定", "長時間OK", "禁煙", "一人でも入りやすい"],
     photos: {
       menu: [
         "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop",
@@ -161,7 +161,7 @@ const mockCafes: Cafe[] = [
     rating: 4.9,
     reviews: 2,
     price_range: "expensive",
-    tags: ["チョコレート", "プレミアム", "デザート"],
+    tags: ["チョコレート", "プレミアム", "デザート", "静か", "日本人が多い", "禁煙", "観光向け"],
     photos: {
       menu: [
         "https://images.unsplash.com/photo-1511381939415-e44015466834?w=600&h=400&fit=crop",
@@ -187,7 +187,7 @@ const mockCafes: Cafe[] = [
     rating: 4.2,
     reviews: 2,
     price_range: "moderate",
-    tags: ["スポーツバー", "Wi-Fi", "屋外席"],
+    tags: ["スポーツバー", "Wi-Fi", "屋外席", "会話向き", "長時間OK"],
     photos: {
       menu: [
         "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=600&h=400&fit=crop",
@@ -213,7 +213,7 @@ const mockCafes: Cafe[] = [
     rating: 4.7,
     reviews: 3,
     price_range: "moderate",
-    tags: ["ブランチ", "Wi-Fi", "庭園", "落ち着いた"],
+    tags: ["ブランチ", "Wi-Fi", "庭園", "静か", "会話向き", "屋外席", "日本人が多い", "禁煙"],
     photos: {
       menu: [
         "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&h=400&fit=crop",
@@ -239,7 +239,7 @@ const mockCafes: Cafe[] = [
     rating: 4.9,
     reviews: 3,
     price_range: "moderate",
-    tags: ["書店", "静か", "Wi-Fi", "仕事向き"],
+    tags: ["書店", "静か", "Wi-Fi", "作業向き", "一人でも入りやすい", "Wi-Fi安定", "長時間OK", "コンセント", "禁煙"],
     photos: {
       menu: [
         "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=600&h=400&fit=crop",

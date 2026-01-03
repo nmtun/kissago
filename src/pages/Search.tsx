@@ -19,11 +19,24 @@ const Search = () => {
   const { userLocation, locationError } = useLocation();
   const [cafesWithDistance, setCafesWithDistance] = useState<Cafe[]>([]);
   const [filters, setFilters] = useState({
+    // Cafe types
     dogFriendly: false,
     catFriendly: false,
+    // Purpose
+    workFriendly: false,
+    conversationFriendly: false,
+    soloFriendly: false,
+    quiet: false,
+    touristFriendly: false,
+    japanesePopular: false,
+    // Facilities
     wifi: false,
     powerOutlets: false,
+    stableWifi: false,
+    longStayOk: false,
+    nonSmoking: false,
     outdoor: false,
+    // Price
     cheap: false,
     moderate: false,
     expensive: false,
@@ -63,13 +76,23 @@ const Search = () => {
       }
 
       // Type filters
-      if (filters.dogFriendly && !cafe.tags.some(t => t.toLowerCase().includes("dog"))) return false;
-      if (filters.catFriendly && !cafe.tags.some(t => t.toLowerCase().includes("cat"))) return false;
+      if (filters.dogFriendly && !cafe.tags.some(t => t.toLowerCase().includes("dog") || t.toLowerCase().includes("ドッグ") || t.toLowerCase().includes("犬"))) return false;
+      if (filters.catFriendly && !cafe.tags.some(t => t.toLowerCase().includes("cat") || t.toLowerCase().includes("キャット") || t.toLowerCase().includes("猫"))) return false;
 
-      // Amenity filters
-      if (filters.wifi && !cafe.tags.includes("Wi-Fi")) return false;
-      if (filters.powerOutlets && !cafe.tags.includes("Power Outlets")) return false;
-      if (filters.outdoor && !cafe.tags.includes("Outdoor")) return false;
+      // Purpose filters
+      if (filters.workFriendly && !cafe.tags.some(t => t.toLowerCase().includes("work") || t.toLowerCase().includes("作業") || t.toLowerCase().includes("仕事"))) return false;
+      if (filters.conversationFriendly && !cafe.tags.some(t => t.toLowerCase().includes("会話") || t.toLowerCase().includes("conversation") || t.toLowerCase().includes("talk"))) return false;
+      if (filters.soloFriendly && !cafe.tags.some(t => t.toLowerCase().includes("一人") || t.toLowerCase().includes("solo") || t.toLowerCase().includes("alone"))) return false;
+      if (filters.quiet && !cafe.tags.some(t => t.toLowerCase().includes("quiet") || t.toLowerCase().includes("静か") || t.toLowerCase().includes("落ち着"))) return false;
+      if (filters.touristFriendly && !cafe.tags.some(t => t.toLowerCase().includes("観光") || t.toLowerCase().includes("tourist") || t.toLowerCase().includes("旅行"))) return false;
+      if (filters.japanesePopular && !cafe.tags.some(t => t.toLowerCase().includes("日本人") || t.toLowerCase().includes("japanese"))) return false;
+
+      // Facility filters
+      if (filters.powerOutlets && !cafe.tags.some(t => t.toLowerCase().includes("power") || t.toLowerCase().includes("電源") || t.toLowerCase().includes("outlet") || t.toLowerCase().includes("コンセント"))) return false;
+      if (filters.stableWifi && !cafe.tags.some(t => t.toLowerCase().includes("wi-fi") || t.toLowerCase().includes("wifi") || t.toLowerCase().includes("安定"))) return false;
+      if (filters.longStayOk && !cafe.tags.some(t => t.toLowerCase().includes("長時間") || t.toLowerCase().includes("long stay") || t.toLowerCase().includes("work"))) return false;
+      if (filters.nonSmoking && !cafe.tags.some(t => t.toLowerCase().includes("禁煙") || t.toLowerCase().includes("non-smoking") || t.toLowerCase().includes("smoke-free"))) return false;
+      if (filters.outdoor && !cafe.tags.some(t => t.toLowerCase().includes("outdoor") || t.toLowerCase().includes("屋外") || t.toLowerCase().includes("garden") || t.toLowerCase().includes("庭園"))) return false;
 
       // Price filters (OR logic if any price is selected)
       const priceFilters = [filters.cheap, filters.moderate, filters.expensive];
