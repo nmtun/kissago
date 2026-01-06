@@ -361,7 +361,7 @@ const CafeDetail = () => {
         </div>
 
         {/* Photo Tabs */}
-        <Tabs defaultValue="menu" className="w-full">
+        <Tabs defaultValue="interior" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2 bg-secondary/50">
             <TabsTrigger value="interior">店内</TabsTrigger>
             <TabsTrigger value="menu">メニュー</TabsTrigger>
