@@ -7,6 +7,7 @@ import { getAllCafes, Cafe } from "@/lib/mock-data";
 import { MapPin, Coffee, Heart, Sparkles } from "lucide-react";
 import { calculateDistance } from "@/lib/distance";
 import { useLocation } from "@/contexts/LocationContext";
+import { useAuth } from "@/contexts/AuthContext";
 import heroImage from "@/assets/hero-cafe.jpg";
 
 interface UserPreferences {
@@ -16,14 +17,26 @@ interface UserPreferences {
   amenities: string[];
 }
 
-const getRecommendedCafes = (preferences: UserPreferences | null, allCafes: Cafe[]): Cafe[] => {
-  if (!preferences || (preferences.cafeTypes.length === 0 && preferences.priceRange.length === 0 && preferences.amenities.length === 0)) {
-    // No preferences, return top rated cafes
-    return [...allCafes].sort((a, b) => b.rating - a.rating).slice(0, 5);
+const getRecommendedCafes = (
+  preferences: UserPreferences | null,
+  allCafes: Cafe[],
+  isAuthenticated: boolean
+): Cafe[] => {
+  if (
+    !isAuthenticated ||
+    !preferences ||
+    (preferences.cafeTypes.length === 0 &&
+      preferences.priceRange.length === 0 &&
+      preferences.amenities.length === 0)
+  ) {
+    // Not logged in or no preferences, return cafes sorted by distance
+    return [...allCafes]
+      .sort((a, b) => (a.distance || 0) - (b.distance || 0))
+      .slice(0, 5);
   }
 
   // Score each cafe based on preferences match
-  const scoredCafes = allCafes.map(cafe => {
+  const scoredCafes = allCafes.map((cafe) => {
     let score = 0;
 
     // Price range match
@@ -32,18 +45,63 @@ const getRecommendedCafes = (preferences: UserPreferences | null, allCafes: Cafe
     }
 
     // Cafe type match
-    if (preferences.cafeTypes.includes("dog") && cafe.tags.some(t => t.toLowerCase().includes("dog"))) score += 2;
-    if (preferences.cafeTypes.includes("cat") && cafe.tags.some(t => t.toLowerCase().includes("cat"))) score += 2;
-    if (preferences.cafeTypes.includes("work") && cafe.tags.some(t => t.toLowerCase().includes("work") || t.toLowerCase().includes("wi-fi"))) score += 2;
-    if (preferences.cafeTypes.includes("quiet") && cafe.tags.some(t => t.toLowerCase().includes("quiet") || t.toLowerCase().includes("book"))) score += 2;
+    if (
+      preferences.cafeTypes.includes("dog") &&
+      cafe.tags.some((t) => t.toLowerCase().includes("dog"))
+    )
+      score += 2;
+    if (
+      preferences.cafeTypes.includes("cat") &&
+      cafe.tags.some((t) => t.toLowerCase().includes("cat"))
+    )
+      score += 2;
+    if (
+      preferences.cafeTypes.includes("work") &&
+      cafe.tags.some(
+        (t) =>
+          t.toLowerCase().includes("work") || t.toLowerCase().includes("wi-fi")
+      )
+    )
+      score += 2;
+    if (
+      preferences.cafeTypes.includes("quiet") &&
+      cafe.tags.some(
+        (t) =>
+          t.toLowerCase().includes("quiet") || t.toLowerCase().includes("book")
+      )
+    )
+      score += 2;
 
     // Amenities match
-    if (preferences.amenities.includes("wifi") && cafe.tags.some(t => t.toLowerCase().includes("wi-fi"))) score += 1;
-    if (preferences.amenities.includes("outlets") && cafe.tags.some(t => t.toLowerCase().includes("outlet") || t.toLowerCase().includes("power"))) score += 1;
-    if (preferences.amenities.includes("outdoor") && cafe.tags.some(t => t.toLowerCase().includes("outdoor") || t.toLowerCase().includes("garden"))) score += 1;
+    if (
+      preferences.amenities.includes("wifi") &&
+      cafe.tags.some((t) => t.toLowerCase().includes("wi-fi"))
+    )
+      score += 1;
+    if (
+      preferences.amenities.includes("outlets") &&
+      cafe.tags.some(
+        (t) =>
+          t.toLowerCase().includes("outlet") ||
+          t.toLowerCase().includes("power")
+      )
+    )
+      score += 1;
+    if (
+      preferences.amenities.includes("outdoor") &&
+      cafe.tags.some(
+        (t) =>
+          t.toLowerCase().includes("outdoor") ||
+          t.toLowerCase().includes("garden")
+      )
+    )
+      score += 1;
 
     // Distance preference
-    const maxDist = preferences.maxDistance === "any" ? 100 : parseFloat(preferences.maxDistance);
+    const maxDist =
+      preferences.maxDistance === "any"
+        ? 100
+        : parseFloat(preferences.maxDistance);
     if (cafe.distance && cafe.distance <= maxDist) score += 1;
 
     // Add rating as tie-breaker
@@ -55,18 +113,21 @@ const getRecommendedCafes = (preferences: UserPreferences | null, allCafes: Cafe
   return scoredCafes
     .sort((a, b) => b.score - a.score)
     .slice(0, 5)
-    .map(item => item.cafe);
+    .map((item) => item.cafe);
 };
 
 const Index = () => {
   const [recommendedCafes, setRecommendedCafes] = useState<Cafe[]>([]);
   const { userLocation } = useLocation();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (userLocation) {
-      const savedPreferences = JSON.parse(localStorage.getItem("user_preferences") || "null");
+      const savedPreferences = JSON.parse(
+        localStorage.getItem("user_preferences") || "null"
+      );
       const allCafes = getAllCafes();
-      
+
       // Calculate distances for all cafes
       const cafesWithDistance = allCafes.map((cafe) => ({
         ...cafe,
@@ -77,10 +138,16 @@ const Index = () => {
           cafe.lng
         ),
       }));
-      
-      setRecommendedCafes(getRecommendedCafes(savedPreferences, cafesWithDistance));
+
+      setRecommendedCafes(
+        getRecommendedCafes(
+          savedPreferences,
+          cafesWithDistance,
+          isAuthenticated
+        )
+      );
     }
-  }, [userLocation]);
+  }, [userLocation, isAuthenticated]);
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -169,7 +236,9 @@ const Index = () => {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-primary mb-2">
                 <Coffee className="h-7 w-7" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">厳選されたセレクション</h3>
+              <h3 className="text-xl font-semibold text-foreground">
+                厳選されたセレクション
+              </h3>
               <p className="text-muted-foreground">
                 本物のレビューと詳細情報を持つ厳選されたカフェ
               </p>
@@ -179,7 +248,9 @@ const Index = () => {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-primary mb-2">
                 <MapPin className="h-7 w-7" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">スマートフィルター</h3>
+              <h3 className="text-xl font-semibold text-foreground">
+                スマートフィルター
+              </h3>
               <p className="text-muted-foreground fold-bold">
                 Wi-Fi、ペット可、静か、賑やかなど、必要なものを見つけよう
               </p>
@@ -189,7 +260,9 @@ const Index = () => {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-primary mb-2">
                 <Heart className="h-7 w-7" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">お気に入りを保存</h3>
+              <h3 className="text-xl font-semibold text-foreground">
+                お気に入りを保存
+              </h3>
               <p className="text-muted-foreground">
                 お気に入りのカフェコレクションを作ろう
               </p>
@@ -201,7 +274,10 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 KissaGo. ベトナムのカフェ好きのために、愛を込めて制作されました。</p>
+          <p>
+            © 2025 KissaGo.
+            ベトナムのカフェ好きのために、愛を込めて制作されました。
+          </p>
         </div>
       </footer>
     </div>
